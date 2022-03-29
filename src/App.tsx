@@ -1,6 +1,6 @@
 import "./App.css";
 import { DropdownSearch } from "./components/DropdownSearch";
-import { useOnInputChange } from "./components/hooks/useOnInputChange";
+import { useOnInputChange } from "./hooks/useOnInputChange";
 import { ListItem } from "./components/ListItem";
 
 const App = () => {

@@ -2,8 +2,8 @@ import { useState } from "react";
 import { useObservableCallback, useObservableState } from "observable-hooks";
 import { ChangeEvent } from "react";
 import { map, tap, switchMap, from, of, iif, debounceTime } from "rxjs";
-import { fetchRepositoriesAndUsers } from "../../services/githubApi";
-import { SearchData } from "../../services/types";
+import { fetchRepositoriesAndUsers } from "../services/githubApi";
+import { SearchData } from "../services/types";
 
 export const useOnInputChange = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);

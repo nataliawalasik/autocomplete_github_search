@@ -1,7 +1,7 @@
 import * as api from "../services/githubApi";
 import { act, renderHook } from "@testing-library/react-hooks";
 import { usersMock } from "../usersMock";
-import { useOnInputChange } from "../components/hooks/useOnInputChange";
+import { useOnInputChange } from "../hooks/useOnInputChange";
 import { of } from "rxjs";
 
 jest
