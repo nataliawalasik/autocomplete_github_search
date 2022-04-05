@@ -3,7 +3,6 @@ import {
   KeyboardEvent,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -44,15 +43,18 @@ export const DropdownSearch = <T,>(props: Props<T>) => {
     renderItem,
     keyExtractor,
   } = props;
+
   const disableOptionHover = useRef<boolean>(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const itemsRef = useRef([]);
+
+  useEffect(() => {
+    itemsRef.current = Array(list?.length);
+  }, [list?.length]);
 
   const [selectedIndex, setSelectedIndex] = useState<number | undefined>(
     undefined
   );
-
-  // eslint-disable-next-line
-  const listRefMemo = useMemo<HTMLDivElement[]>(() => [], [list]);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => {
@@ -93,11 +95,11 @@ export const DropdownSearch = <T,>(props: Props<T>) => {
 
   useEffect(() => {
     disableOptionHover.current &&
-      listRefMemo[selectedIndex]?.scrollIntoView({
+      itemsRef.current[selectedIndex]?.scrollIntoView({
         behavior: "smooth",
         block: "end",
       });
-  }, [selectedIndex, listRefMemo]);
+  }, [selectedIndex, itemsRef]);
 
   useEffect(() => setSelectedIndex(0), [list]);
 
@@ -128,7 +130,7 @@ export const DropdownSearch = <T,>(props: Props<T>) => {
                   key={keyExtractor(item)}
                   onMouseMove={onMouseMove(index)}
                   ref={(ref) => {
-                    listRefMemo[index] = ref;
+                    itemsRef.current[index] = ref;
                   }}
                 >
                   {renderItem(item, index, selectedIndex)}

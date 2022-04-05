@@ -1,4 +1,4 @@
-import { combineLatestWith, map, Observable } from "rxjs";
+import { map, Observable, withLatestFrom } from "rxjs";
 import { fetch } from "./api";
 import {
   ResponseItems,
@@ -21,7 +21,9 @@ export const fetchRepositoriesAndUsers = (
     `${API_SEARCH_URL}${REPOSITORIES}${searchParam}`
   ).pipe(
     map(({ data, error }) =>
-      data ? data.items?.sort((a, b) => compare(a.name, b.name)) : error
+      data
+        ? [...data?.items].sort((a, b) => a.name.localeCompare(b.name))
+        : error
     )
   );
 
@@ -29,12 +31,12 @@ export const fetchRepositoriesAndUsers = (
     `${API_SEARCH_URL}${USERS}${searchParam}`
   ).pipe(
     map(({ data, error }) =>
-      data ? data.items?.sort((a, b) => compare(a.login, b.login)) : error
+      data ? data.items?.sort((a, b) => a.login.localeCompare(b.login)) : error
     )
   );
 
   return reposObservable$.pipe(
-    combineLatestWith(usersObservable$),
+    withLatestFrom(usersObservable$),
     map(([repositoriesResponse, usersResponse]) => {
       if (
         isRepositoriesRsponseData(repositoriesResponse) &&
@@ -60,16 +62,6 @@ export const fetchRepositoriesAndUsers = (
       return { error: "An error occured. Please try again later", data: null };
     })
   );
-};
-
-const compare = (a: string, b: string) => {
-  if (a < b) {
-    return -1;
-  }
-  if (a > b) {
-    return 1;
-  }
-  return 0;
 };
 
 const isRepositoriesRsponseData = (

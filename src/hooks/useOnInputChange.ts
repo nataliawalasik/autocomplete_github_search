@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useObservableCallback, useObservableState } from "observable-hooks";
 import { ChangeEvent } from "react";
-import { map, tap, switchMap, from, of, iif, debounceTime } from "rxjs";
+import { map, tap, switchMap, of, iif, debounceTime } from "rxjs";
 import { fetchRepositoriesAndUsers } from "../services/githubApi";
 import { SearchData } from "../services/types";
 
@@ -23,18 +23,16 @@ export const useOnInputChange = () => {
       switchMap((data) =>
         iif(
           () => data.length > 2,
-          from(
-            fetchRepositoriesAndUsers(data).pipe(
-              map(({ data, error }) => {
-                setIsLoading(false);
-                if (error) {
-                  setErrorMessage(error);
-                  return null;
-                } else {
-                  return data;
-                }
-              })
-            )
+          fetchRepositoriesAndUsers(data).pipe(
+            map(({ data, error }) => {
+              setIsLoading(false);
+              if (error) {
+                setErrorMessage(error);
+                return null;
+              } else {
+                return data;
+              }
+            })
           ),
           of(null)
         )
