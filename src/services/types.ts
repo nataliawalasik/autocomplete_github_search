@@ -19,8 +19,3 @@ export interface SearchData {
   name: string;
   url: string;
 }
-
-export interface CustomResponse<T> {
-  data?: T;
-  error?: string;
-}

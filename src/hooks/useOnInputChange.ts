@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useObservableCallback, useObservableState } from "observable-hooks";
 import { ChangeEvent } from "react";
-import { map, tap, switchMap, of, iif, debounceTime } from "rxjs";
+import { map, tap, switchMap, of, iif, debounceTime, catchError } from "rxjs";
 import { fetchRepositoriesAndUsers } from "../services/githubApi";
 import { SearchData } from "../services/types";
+import { R } from "@mobily/ts-belt";
 
 export const useOnInputChange = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -24,14 +25,14 @@ export const useOnInputChange = () => {
         iif(
           () => data.length > 2,
           fetchRepositoriesAndUsers(data).pipe(
-            map(({ data, error }) => {
+            map((output) => {
+              console.log(output);
               setIsLoading(false);
-              if (error) {
-                setErrorMessage(error);
-                return null;
-              } else {
-                return data;
-              }
+              return output;
+            }),
+            catchError((e) => {
+              setErrorMessage(e);
+              return of(null);
             })
           ),
           of(null)

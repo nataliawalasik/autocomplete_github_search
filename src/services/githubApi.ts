@@ -1,45 +1,35 @@
-import { map, Observable, withLatestFrom } from "rxjs";
-import { fetch } from "./api";
-import {
-  ResponseItems,
-  RepoItem,
-  SearchData,
-  UserItem,
-  CustomResponse,
-} from "./types";
+import { withLatestFrom } from "rxjs";
+import { mapR } from "../utils/mapper";
+import { fetchR } from "./api";
+import { ResponseItems, RepoItem, SearchData, UserItem } from "./types";
 
 const API_SEARCH_URL = "https://api.github.com/search";
 const REPOSITORIES = "/repositories";
 const USERS = "/users";
 
-export const fetchRepositoriesAndUsers = (
-  data: string
-): Observable<CustomResponse<SearchData[]>> => {
+export const fetchRepositoriesAndUsers = (data: string) => {
   const searchParam = `?q=${data}`;
 
-  const reposObservable$ = fetch<ResponseItems<RepoItem>>(
+  const reposObservable$ = fetchR<ResponseItems<RepoItem>>(
     `${API_SEARCH_URL}${REPOSITORIES}${searchParam}`
-  ).pipe(
-    map(({ data, error }) =>
-      data
-        ? [...data?.items].sort((a, b) => a.name.localeCompare(b.name))
-        : error
-    )
   );
+  //   .pipe(
+  //   mapR((data) => {
+  //     return [...data.items].sort((a, b) => a.name.localeCompare(b.name));
+  //   }),
+  //   map(R.getWithDefault([] as RepoItem[]))
+  // );
 
-  const usersObservable$ = fetch<ResponseItems<UserItem>>(
+  const usersObservable$ = fetchR<ResponseItems<UserItem>>(
     `${API_SEARCH_URL}${USERS}${searchParam}`
-  ).pipe(
-    map(({ data, error }) =>
-      data ? data.items?.sort((a, b) => a.login.localeCompare(b.login)) : error
-    )
   );
 
   return reposObservable$.pipe(
     withLatestFrom(usersObservable$),
-    map(([repositoriesResponse, usersResponse]) => {
+    // map array of Observable<Result>
+    mapR(([repositoriesResponse, usersResponse]) => {
       if (
-        isRepositoriesRsponseData(repositoriesResponse) &&
+        isRepositoriesResponseData(repositoriesResponse) &&
         isUsersResponseData(usersResponse)
       ) {
         const repos: SearchData[] = repositoriesResponse.map(
@@ -56,15 +46,13 @@ export const fetchRepositoriesAndUsers = (
             url: html_url,
           })
         );
-
-        return { data: [...users, ...repos], error: null };
+        return users.concat(repos);
       }
-      return { error: "An error occured. Please try again later", data: null };
     })
   );
 };
 
-const isRepositoriesRsponseData = (
+const isRepositoriesResponseData = (
   response: string | RepoItem[]
 ): response is RepoItem[] => {
   return typeof response !== "string" && Array.isArray(response);
